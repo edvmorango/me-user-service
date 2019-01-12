@@ -1,6 +1,7 @@
 package com.me.userservice.endpoint.response
 
 import com.me.userservice.model.Address
+import com.me.userservice.model.User
 import java.time.LocalDate
 
 
@@ -21,3 +22,22 @@ data class AddressResponse(
         val number: Int,
         val zipCode: String
 )
+
+
+fun User.asResponse(): UserResponse  {
+
+    return UserResponse(
+            this.uuid,
+            this.firstName,
+            this.lastName,
+            this.cpf,
+            this.birthDate,
+            this.address.asResponse(),
+            this.emails,
+            this.phones)
+
+}
+
+fun Address.asResponse(): AddressResponse  {
+    return AddressResponse(this.address, this.number, this.zipCode)
+}

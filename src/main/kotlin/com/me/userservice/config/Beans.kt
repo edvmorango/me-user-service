@@ -15,6 +15,10 @@ val context = org.springframework.context.support.beans {
 
     bean<DynamoDBConfig>()
 
+    bean {
+        ref<DynamoDBConfig>().getDynamoClient()
+    }
+
     bean<UserRepository>{
         UserRepositoryDynamoDB(ref())
     }

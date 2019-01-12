@@ -4,3 +4,11 @@ server:
 context:
   initializer:
     classes: com.me.userservice.ContextInitializer
+
+
+aws:
+  dynamodb:
+    region: "us-east-1"
+    host: "http://localhost:8000"
+    access-key: "123"
+    secret-key: "123"

@@ -15,10 +15,10 @@ data class UserItem(val uuid: String,
                 val address: AddressItem,
                 val emails: List<String>,
                 val phones: List<String>,
-                val active: Boolean = true) {
+                val active: Boolean) {
 
     fun asDomain(): User {
-        return User(uuid, firstName, lastName, cpf, LocalDate.parse(birthDate, DateTimeFormatter.ISO_DATE), address.asDomain(), emails, phones)
+        return User(uuid, firstName, lastName, cpf, LocalDate.parse(birthDate, DateTimeFormatter.ISO_DATE), address.asDomain(), emails, phones, active)
     }
 
 }
@@ -42,7 +42,8 @@ fun User.asItem(): UserItem {
             this.birthDate.toString(),
             this.address.asItem(),
             this.emails,
-            this.phones)
+            this.phones,
+            this.active)
 
 }
 

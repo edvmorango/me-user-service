@@ -6,12 +6,11 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.publisher.toMono
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
-import software.amazon.awssdk.services.dynamodb.model.ScanRequest
+import software.amazon.awssdk.services.dynamodb.model.*
+import software.amazon.awssdk.services.dynamodb.model.ComparisonOperator.*
 import java.util.*
+import java.util.Collections.*
 
 
 interface UserRepository {
@@ -19,6 +18,8 @@ interface UserRepository {
     fun create(userItem: UserItem): Mono<UserItem>
 
     fun findByUuid(uuid: String): Mono<UserItem>
+
+    fun findByCpf(cpf: String): Mono<UserItem>
 
     fun list(): Flux<UserItem>
 }
@@ -87,7 +88,7 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
     }
 
     override fun findByUuid(uuid: String): Mono<UserItem> {
-        val key = Collections.singletonMap("uuid", AttributeValue.builder().s(uuid).build())
+        val key = singletonMap("uuid", AttributeValue.builder().s(uuid).build())
 
         val request = GetItemRequest
                 .builder()
@@ -104,9 +105,34 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
 
     }
 
+    override fun findByCpf(cpf: String): Mono<UserItem> {
+        val att = AttributeValue.builder().s(cpf).build()
+
+        val condition = singletonMap("cpf",Condition
+                .builder()
+                .attributeValueList(att)
+                .comparisonOperator(EQ)
+                .build())
+
+        val request = QueryRequest
+                .builder()
+                .tableName(tableName)
+                .indexName("cpfIndex")
+                .keyConditions(condition)
+                .build()
+
+        return Mono.fromFuture(client.query(request)).flatMap {
+            if(it.count() > 0)
+                toItem(it.items()[0]).toMono()
+            else
+                Mono.empty()
+        }
+
+    }
+
     override fun list(): Flux<UserItem> {
 
-        val attributeValue = Collections.singletonMap(":active", AttributeValue.builder().bool(true).build())
+        val attributeValue = singletonMap(":active", AttributeValue.builder().bool(true).build())
 
         val request = ScanRequest
                 .builder()

@@ -5,6 +5,9 @@ import com.me.userservice.repository.UserRepository
 import com.me.userservice.repository.asItem
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.publisher.switchIfEmpty
+import reactor.core.publisher.toMono
+import java.lang.RuntimeException
 import java.time.Duration
 import java.util.*
 
@@ -21,11 +24,22 @@ interface UserService {
 
 class UserServiceImpl(private val userRepository: UserRepository): UserService {
 
+
+    private fun validateUser(user: User): Flux<Void> {
+
+        val cpfExists = userRepository.findByCpf(user.cpf).flatMap{Mono.error<Void>(RuntimeException("CPF Already Exists"))}
+
+        return Flux.merge(cpfExists, cpfExists)
+    }
+
     override fun create(user: User): Mono<User> {
 
-       val user = user.copy(uuid = UUID.randomUUID().toString())
+       val usr = user.copy(uuid = UUID.randomUUID().toString())
 
-        return userRepository.create(user.asItem()).map {it.asDomain()}
+       return validateUser(usr)
+               .then(userRepository
+                        .create(usr.asItem())
+                        .map {it.asDomain()})
 
     }
 

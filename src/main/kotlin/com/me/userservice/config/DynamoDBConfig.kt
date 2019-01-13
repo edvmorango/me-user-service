@@ -9,6 +9,8 @@ import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.*
+import software.amazon.awssdk.services.dynamodb.model.KeyType.*
+import software.amazon.awssdk.services.dynamodb.model.ProjectionType.*
 import java.net.URI
 
 
@@ -51,17 +53,23 @@ class DynamoDBConfig {
 
         if(!client.listTables().tableNames().contains("user")) {
 
-            val key = KeySchemaElement
+            val uuidKey = KeySchemaElement
                     .builder()
-                    .keyType(KeyType.HASH)
+                    .keyType(HASH)
                     .attributeName("uuid")
                     .build()
 
-            val att = AttributeDefinition
-                    .builder()
-                    .attributeName("uuid")
-                    .attributeType(ScalarAttributeType.S)
-                    .build()
+            val atts = listOf<AttributeDefinition>(
+                    AttributeDefinition
+                        .builder()
+                        .attributeName("uuid")
+                        .attributeType(ScalarAttributeType.S)
+                        .build(),
+                    AttributeDefinition
+                            .builder()
+                            .attributeName("cpf")
+                            .attributeType(ScalarAttributeType.S)
+                            .build())
 
             val pt = ProvisionedThroughput
                     .builder()
@@ -69,14 +77,33 @@ class DynamoDBConfig {
                     .writeCapacityUnits(10)
                     .build()
 
+            val ks = KeySchemaElement
+                    .builder()
+                    .attributeName("cpf")
+                    .keyType(HASH)
+                    .build()
+
+            val pj = Projection
+                    .builder()
+                    .projectionType(ALL)
+                    .build()
+
+            val si = GlobalSecondaryIndex
+                    .builder()
+                    .indexName("cpfIndex")
+                    .provisionedThroughput(pt)
+                    .projection(pj)
+                    .keySchema(ks)
+                    .build()
+
             val req = CreateTableRequest
                     .builder()
                     .tableName("user")
-                    .keySchema(key)
-                    .attributeDefinitions(att)
+                    .keySchema(uuidKey)
+                    .attributeDefinitions(atts)
+                    .globalSecondaryIndexes(si)
                     .provisionedThroughput(pt)
                     .build()
-
 
             client.createTable(req)
         }

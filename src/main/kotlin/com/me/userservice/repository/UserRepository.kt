@@ -8,7 +8,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-
+import software.amazon.awssdk.services.dynamodb.model.ScanRequest
+import java.util.*
 
 
 interface UserRepository {
@@ -36,7 +37,6 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
         addressItem["zipCode"] = AttributeValue.builder().s(user.address.zipCode).build()
 
 
-
         userItem["uuid"] = AttributeValue.builder().s(user.uuid).build()
         userItem["firstName"] = AttributeValue.builder().s(user.firstName).build()
         userItem["lastName"] = AttributeValue.builder().s(user.lastName).build()
@@ -45,14 +45,37 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
         userItem["address"] = AttributeValue.builder().m(addressItem).build()
         userItem["phones"] = AttributeValue.builder().ss(user.phones).build()
         userItem["emails"] = AttributeValue.builder().ss(user.emails).build()
-
+        userItem["active"] = AttributeValue.builder().bool(user.active).build()
 
         return userItem
     }
 
+    private fun toItem(dic: Map<String, AttributeValue>): UserItem {
+
+        val aDic = dic["address"]!!.m()
+
+        val address = AddressItem(aDic["address"]!!.s(), aDic["number"]!!.n().toInt(), aDic["zipCode"]!!.s())
+
+
+        return UserItem(
+                dic["uuid"]!!.s(),
+                dic["firstName"]!!.s(),
+                dic["lastName"]!!.s(),
+                dic["cpf"]!!.s(),
+                dic["birthDate"]!!.s(),
+                address,
+                dic["phones"]!!.ss(),
+                dic["emails"]!!.ss(),
+                dic["active"]!!.bool())
+
+    }
+
+
+
     override fun create(userItem: UserItem): Mono<UserItem> {
 
-        val request = PutItemRequest.builder()
+        val request = PutItemRequest
+                .builder()
                 .tableName(tableName)
                 .item(userRequestBuilder(userItem))
                 .build()
@@ -66,6 +89,20 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
     }
 
     override fun list(): Flux<UserItem> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+        val attributeValue = Collections.singletonMap(":active", AttributeValue.builder().bool(true).build())
+
+        val request = ScanRequest
+                .builder()
+                .tableName(tableName)
+                .filterExpression("active = :active")
+                .expressionAttributeValues(attributeValue)
+                .build()
+
+        return Flux.from(client.scanPaginator(request).items()).map { toItem(it) }
+
     }
+
+
+
 }

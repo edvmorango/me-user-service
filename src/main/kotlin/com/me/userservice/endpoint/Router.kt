@@ -18,7 +18,7 @@ class Router(private val healthEndpoint: HealthEndpoint, private val userEndpoin
 
             user.nest{
                 POST("", userEndpoint::create)
-//                GET("", userEndpoint::list)
+                GET("", userEndpoint::list)
                 GET("/{uuid}", userEndpoint::findByUuid)
 
             }

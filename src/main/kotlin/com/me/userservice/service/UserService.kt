@@ -5,6 +5,7 @@ import com.me.userservice.repository.UserRepository
 import com.me.userservice.repository.asItem
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.time.Duration
 import java.util.*
 
 interface UserService {
@@ -33,6 +34,6 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
     }
 
     override fun list(): Flux<User> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return userRepository.list().map { it.asDomain() }
     }
 }

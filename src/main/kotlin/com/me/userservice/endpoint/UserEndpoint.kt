@@ -30,9 +30,14 @@ class UserEndpoint(private val userService: UserService) {
         return ServerResponse.ok().build()
     }
 
-    fun list(req: ServerRequest): Flux<ServerResponse> {
-        return Flux.empty()
-    }
+    fun list(req: ServerRequest): Mono<ServerResponse> {
+
+        val stream = userService.list().map { it.asResponse() }
+
+        return ServerResponse
+                .ok()
+                .contentType(MediaType.APPLICATION_STREAM_JSON)
+                .body(stream, UserResponse::class.java)    }
 
 
 }

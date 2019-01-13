@@ -4,10 +4,12 @@ import com.me.userservice.config.DynamoDBConfig
 import com.me.userservice.model.User
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.publisher.toMono
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest
 import java.util.*
 
@@ -85,7 +87,21 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
     }
 
     override fun findByUuid(uuid: String): Mono<UserItem> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val key = Collections.singletonMap("uuid", AttributeValue.builder().s(uuid).build())
+
+        val request = GetItemRequest
+                .builder()
+                .tableName(tableName)
+                .key(key)
+                .build()
+
+        return Mono.fromFuture(client.getItem(request)).flatMap {
+            if(it.item().entries.size != 0)
+                toItem(it.item()).toMono()
+            else
+                Mono.empty()
+        }
+
     }
 
     override fun list(): Flux<UserItem> {

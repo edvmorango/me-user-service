@@ -30,7 +30,7 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
     }
 
     override fun findByUuid(uuid: String): Mono<User> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return userRepository.findByUuid(uuid).map { it.asDomain() }
     }
 
     override fun list(): Flux<User> {

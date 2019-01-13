@@ -27,7 +27,14 @@ class UserEndpoint(private val userService: UserService) {
     }
 
     fun findByUuid(req: ServerRequest): Mono<ServerResponse> {
-        return ServerResponse.ok().build()
+
+        val uuid = req.pathVariable("uuid")
+
+        val resp = userService.findByUuid(uuid).map { it.asResponse() }
+
+        return ServerResponse
+                .ok()
+                .body(resp, UserResponse::class.java)
     }
 
     fun list(req: ServerRequest): Mono<ServerResponse> {

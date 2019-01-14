@@ -1,6 +1,6 @@
 package com.me.userservice.service
 
-import com.me.userservice.exceptions.CPFAlreadyExistsException
+import com.me.userservice.exceptions.*
 import com.me.userservice.model.User
 import com.me.userservice.repository.UserRepository
 import com.me.userservice.repository.asItem
@@ -10,6 +10,8 @@ import reactor.core.publisher.switchIfEmpty
 import reactor.core.publisher.toMono
 import java.lang.RuntimeException
 import java.time.Duration
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 interface UserService {
@@ -26,18 +28,38 @@ interface UserService {
 class UserServiceImpl(private val userRepository: UserRepository): UserService {
 
 
-    private fun validateUser(user: User): Flux<Void> {
 
-        val cpfExists = userRepository.findByCpf(user.cpf).flatMap{Mono.error<Void>(CPFAlreadyExistsException(user.cpf))}
+    private fun validateUserFields(user: User): Flux<Void> {
 
-        return Flux.merge(cpfExists, cpfExists)
+        val now = LocalDate.now()
+        return when {
+            user.firstName.isEmpty() -> Flux.error(EmptyFirstNameException())
+            user.lastName.isEmpty() -> Flux.error(EmptyLastNameException())
+            ChronoUnit.YEARS.between(user.birthDate, now) >= 100
+                    || user.birthDate.isAfter(now)
+                    || user.birthDate.isEqual(now)
+                    -> Flux.error(InvalidBirthDateException(user.birthDate))
+            !ValidationService.isValidCpf(user.cpf) -> Flux.error(CPFInvalidException(user.cpf))
+            // TODO email field validation
+            // TODO phone field validation
+            else -> {
+
+                val cpfExists = userRepository.findByCpf(user.cpf).flatMap{Mono.error<Void>(CPFAlreadyExistsException(user.cpf))}
+
+                Flux.merge(cpfExists, cpfExists)
+
+            }
+        }
+
+
+
     }
 
     override fun create(user: User): Mono<User> {
 
        val usr = user.copy(uuid = UUID.randomUUID().toString())
 
-       return validateUser(usr)
+       return validateUserFields(usr)
                .then(userRepository
                         .create(usr.asItem())
                         .map {it.asDomain()})

@@ -1,5 +1,6 @@
 package com.me.userservice.service
 
+import com.me.userservice.exceptions.CPFAlreadyExistsException
 import com.me.userservice.model.User
 import com.me.userservice.repository.UserRepository
 import com.me.userservice.repository.asItem
@@ -27,7 +28,7 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
 
     private fun validateUser(user: User): Flux<Void> {
 
-        val cpfExists = userRepository.findByCpf(user.cpf).flatMap{Mono.error<Void>(RuntimeException("CPF Already Exists"))}
+        val cpfExists = userRepository.findByCpf(user.cpf).flatMap{Mono.error<Void>(CPFAlreadyExistsException(user.cpf))}
 
         return Flux.merge(cpfExists, cpfExists)
     }

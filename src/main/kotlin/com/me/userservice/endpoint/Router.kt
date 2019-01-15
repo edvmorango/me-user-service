@@ -32,16 +32,17 @@ class Router(private val healthEndpoint: HealthEndpoint, private val userEndpoin
                 PUT("/{uuid}", userEndpoint::update)
             }
         }
-    }.filter { request, next ->
-            next
-                    .handle(request)
-                    .onErrorResume {
-                        when(it){
-                            is UserNotFoundException  -> ServerResponse.notFound().build()
-                            is FieldException -> ServerResponse.badRequest().body(Mono.just(BadRequestResponse(msg = it.message!!)), BadRequestResponse::class.java)
-                            is ConflictException ->ServerResponse.status(HttpStatus.CONFLICT).body(Mono.just(ConflictRequestResponse(msg = it.message!!)), ConflictRequestResponse::class.java)
-                            else -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-                        }
-                    }
-        }
+    }
+//            .filter { request, next ->
+//            next
+//                    .handle(request)
+//                    .onErrorResume {
+//                        when(it){
+//                            is UserNotFoundException  -> ServerResponse.notFound().build()
+//                            is FieldException -> ServerResponse.badRequest().body(Mono.just(BadRequestResponse(msg = it.message!!)), BadRequestResponse::class.java)
+//                            is ConflictException ->ServerResponse.status(HttpStatus.CONFLICT).body(Mono.just(ConflictRequestResponse(msg = it.message!!)), ConflictRequestResponse::class.java)
+//                            else -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+//                        }
+//                    }
+//        }
 }

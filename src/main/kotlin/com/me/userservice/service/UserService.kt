@@ -109,15 +109,21 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
     }
 
     override fun update(uuid: String, user: User): Mono<User> {
-        return findByUuid(uuid)
+        return userRepository
+                .findByUuid(uuid)
                 .switchIfEmpty(Mono.error(UserNotFoundException()))
                 .flatMap { userRepository
                             .update(user.copy(uuid = uuid).asItem())
                             .map { it.asDomain() }
-        }
+
+                }
     }
 
     override fun delete(uuid: String): Mono<Unit> {
-        return findByUuid(uuid).flatMap { userRepository.delete(uuid) }
+        return userRepository
+                .findByUuid(uuid)
+                .flatMap { userRepository.delete(uuid) }
+                .switchIfEmpty(Mono.error(UserNotFoundException()))
+
     }
 }

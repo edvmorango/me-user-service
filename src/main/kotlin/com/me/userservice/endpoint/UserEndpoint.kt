@@ -10,8 +10,8 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyToFlux
 import org.springframework.web.reactive.function.server.bodyToMono
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.publisher.toMono
 
 class UserEndpoint(private val userService: UserService) {
 
@@ -32,12 +32,14 @@ class UserEndpoint(private val userService: UserService) {
 
         val uuid = req.pathVariable("uuid")
 
-        val resp = userService.findByUuid(uuid).map { it.asResponse() }
-
-        return ServerResponse
-                .ok()
-                .body(resp, UserResponse::class.java)
-    }
+        return userService
+                .findByUuid(uuid)
+                .map { it.asResponse() }
+                .flatMap {
+                    ServerResponse
+                            .ok()
+                            .body(it.toMono(), UserResponse::class.java)
+                } }
 
     fun list(req: ServerRequest): Mono<ServerResponse> {
 
@@ -59,15 +61,17 @@ class UserEndpoint(private val userService: UserService) {
 
         val uuid = req.pathVariable("uuid")
 
-        val resp = req.bodyToMono<UserRequest>()
+        return req
+                .bodyToMono<UserRequest>()
                 .map{ it.asDomain() }
                 .flatMap{ userService.update(uuid , it) }
                 .map { it.asResponse() }
-
-        return ServerResponse
-                .ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(resp, UserResponse::class.java)
+                .flatMap {
+                    ServerResponse
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(it.toMono(), UserResponse::class.java)
+        }
     }
 
 

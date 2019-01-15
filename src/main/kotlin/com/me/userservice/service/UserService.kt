@@ -114,7 +114,7 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
                 .switchIfEmpty(Mono.error(UserNotFoundException()))
                 .flatMap { userRepository
                             .update(user.copy(uuid = uuid).asItem())
-                            .map { it.asDomain() }
+                            .map { u -> u.asDomain() }
 
                 }
     }

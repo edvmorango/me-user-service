@@ -2,6 +2,7 @@ package com.me.userservice.service
 
 import com.me.userservice.exceptions.*
 import com.me.userservice.model.User
+import com.me.userservice.repository.UserItem
 import com.me.userservice.repository.UserRepository
 import com.me.userservice.repository.asItem
 import reactor.core.publisher.Flux
@@ -21,6 +22,10 @@ interface UserService {
     fun findByUuid(uuid: String): Mono<User>
 
     fun list(cpf: String? = null , firstName: String? = null, lastName: String? = null,  phones: List<String>? = null, emails: List<String>? = null ): Flux<User>
+
+    fun update(uuid: String, user: User): Mono<User>
+
+    fun delete(uuid: String): Mono<Unit>
 
 }
 
@@ -79,7 +84,6 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
 
     }
 
-
     override fun create(user: User): Mono<User> {
 
         return validateUserFields(user)
@@ -97,5 +101,13 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
 
     override fun list(cpf: String?, firstName: String?, lastName: String?, phones: List<String>?, emails: List<String>?): Flux<User> {
         return userRepository.list(cpf, firstName, lastName, phones, emails).map { it.asDomain() }
+    }
+
+    override fun update(uuid: String, user: User): Mono<User> {
+        return userRepository.update(user.asItem()).map { it.asDomain() }
+    }
+
+    override fun delete(uuid: String): Mono<Unit> {
+        return userRepository.delete(uuid)
     }
 }

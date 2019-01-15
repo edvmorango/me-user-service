@@ -9,6 +9,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.bodyToFlux
+import org.springframework.web.reactive.function.server.bodyToMono
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -52,6 +53,31 @@ class UserEndpoint(private val userService: UserService) {
                 .ok()
                 .contentType(MediaType.APPLICATION_STREAM_JSON)
                 .body(stream, UserResponse::class.java)    }
+
+
+    fun update(req : ServerRequest): Mono<ServerResponse> {
+
+        val uuid = req.pathVariable("uuid")
+
+        val resp = req.bodyToMono<UserRequest>()
+                .map{ it.asDomain() }
+                .flatMap{ userService.update(uuid , it) }
+                .map { it.asResponse() }
+
+        return ServerResponse
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(resp, UserResponse::class.java)
+    }
+
+
+    fun delete(req: ServerRequest): Mono<ServerResponse> {
+
+        val uuid = req.pathVariable("uuid")
+
+        return userService.delete(uuid).flatMap { ServerResponse.noContent().build() }
+
+    }
 
 
 }

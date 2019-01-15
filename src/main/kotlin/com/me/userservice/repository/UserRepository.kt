@@ -23,6 +23,11 @@ interface UserRepository {
     fun findByCpf(cpf: String): Mono<UserItem>
 
     fun list(cpf: String? = null , firstName: String? = null, lastName: String? = null,  phones: List<String>? = null, emails: List<String>? = null ): Flux<UserItem>
+
+    fun update(userItem: UserItem): Mono<UserItem>
+
+    fun delete(uuid: String): Mono<Unit>
+
 }
 
 class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepository {
@@ -178,6 +183,33 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
 
     }
 
+    override fun update(userItem: UserItem): Mono<UserItem> {
+        val key = singletonMap("uuid", AttributeValue.builder().s(userItem.uuid).build())
 
+        val request = UpdateItemRequest
+                .builder()
+                .tableName(tableName)
+                .key(key)
+                .attributeUpdates(userRequestBuilder(userItem).mapValues { AttributeValueUpdate.builder().value(it.value).build() })
+                .build()
 
+        return Mono.fromFuture(client.updateItem(request)).map { userItem }
+    }
+
+    override fun delete(uuid: String): Mono<Unit> {
+
+        val key = singletonMap("uuid", AttributeValue.builder().s(uuid).build())
+
+        val userItem = HashMap<String, AttributeValue>()
+        userItem["active"] = AttributeValue.builder().bool(false).build()
+
+        val request = UpdateItemRequest
+                .builder()
+                .tableName(tableName)
+                .key(key)
+                .attributeUpdates(userItem.mapValues { AttributeValueUpdate.builder().value(it.value).build() })
+                .build()
+
+        return Mono.fromFuture(client.updateItem(request)).map { Unit }
+    }
 }

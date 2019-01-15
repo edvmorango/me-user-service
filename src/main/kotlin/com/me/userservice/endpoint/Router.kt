@@ -20,7 +20,8 @@ class Router(private val healthEndpoint: HealthEndpoint, private val userEndpoin
                 POST("", userEndpoint::create)
                 GET("", userEndpoint::list)
                 GET("/{uuid}", userEndpoint::findByUuid)
-
+                DELETE( "/{uuid}", userEndpoint::delete)
+                PUT("/{uuid}", userEndpoint::update)
             }
         }
     }

@@ -28,37 +28,54 @@ interface UserService {
 class UserServiceImpl(private val userRepository: UserRepository): UserService {
 
 
-
-    private fun validateUserFields(user: User): Flux<Void> {
+    private fun validateUserFields(user: User): Mono<User> {
 
         val now = LocalDate.now()
         val between = ChronoUnit.YEARS.between(user.birthDate, now)
         return when {
-            user.firstName.isEmpty() -> Flux.error(EmptyFirstNameException())
-            user.lastName.isEmpty() -> Flux.error(EmptyLastNameException())
-            user.emails.map { ValidationService.isValidEmail(it) }.reduce { a, b -> a && b } -> Flux.error(EmailsInvalidException(user.emails))
-            user.phones.map { ValidationService.isValidPhone(it) }.reduce { a, b -> a && b } -> Flux.error(PhonesNumbersInvalidException(user.emails))
-            between >= 100 || between < 10
-                    -> Flux.error(InvalidBirthDateException(user.birthDate))
-            !ValidationService.isValidCpf(user.cpf) -> Flux.error(CPFInvalidException(user.cpf))
-            else -> {
-                val cpfExists = userRepository.findByCpf(user.cpf).flatMap{Mono.error<Void>(CPFAlreadyExistsException(user.cpf))}
-                val emailsExists = userRepository.list(emails = user.emails).flatMap{Mono.error<Void>(EmailsAlreadyExistsException(user.emails))}
-                Flux.merge(cpfExists, emailsExists)
-            }
+            user.firstName.isEmpty() ->
+                Mono.error(EmptyFirstNameException())
+            user.lastName.isEmpty() ->
+                Mono.error(EmptyLastNameException())
+            !ValidationService.isValidCpf(user.cpf) ->
+                Mono.error(CPFInvalidException(user.cpf))
+            user.emails.map { ValidationService.isValidEmail(it) }.fold(true){ a, b -> a && b } ->
+                Mono.error(EmailsInvalidException(user.emails))
+            user.phones.map { ValidationService.isValidPhone(it) }.fold(true){ a, b -> a && b } ->
+                Mono.error(PhonesNumbersInvalidException(user.emails))
+            between >= 100 || between < 10 ->
+                Mono.error(InvalidBirthDateException(user.birthDate))
+            else ->
+                Mono.just(user)
         }
+    }
+
+    private fun validateUser(user: User): Mono<User> {
+
+            val cpfExists = userRepository
+                    .findByCpf(user.cpf)
+                    .flatMap{ Mono.error<User>(CPFAlreadyExistsException(user.cpf)) }
+
+            val emailsExists = userRepository
+                    .list(emails = user.emails)
+                    .flatMap { Mono.error<User>(EmailsAlreadyExistsException(user.emails)) }
+
+            return Flux
+                    .merge(cpfExists, emailsExists)
+                    .then(Mono.just(user))
 
     }
 
+
     override fun create(user: User): Mono<User> {
 
-       val usr = user.copy(uuid = UUID.randomUUID().toString())
-
-       return validateUserFields(usr)
-               .then(userRepository
-                        .create(usr.asItem())
-                        .map {it.asDomain()})
-
+        return validateUserFields(user)
+               .flatMap{validateUser(it)}
+               .flatMap {
+                   userRepository
+                      .create(it.copy(uuid = UUID.randomUUID().toString()).asItem())
+                      .map {u -> u.asDomain()}
+               }
     }
 
     override fun findByUuid(uuid: String): Mono<User> {

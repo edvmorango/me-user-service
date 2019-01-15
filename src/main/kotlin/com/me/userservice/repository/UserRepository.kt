@@ -77,7 +77,6 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
 
 
     override fun create(userItem: UserItem): Mono<UserItem> {
-
         val request = PutItemRequest
                 .builder()
                 .tableName(tableName)
@@ -150,19 +149,17 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
             filterAttributes[":lastName"] = AttributeValue.builder().s(lastName).build()
         }
 
-        if(phones != null) {
-            filterAttributes[":ss_phones"] = AttributeValue.builder().ss(phones).build()
-        }
-
         if(emails != null) {
-            filterAttributes[":ss_emails"] = AttributeValue.builder().ss(emails).build()
+            emails.zip(0..emails.size).forEach{
+                filterAttributes[":ss${it.second.toString().padStart(2, '0')}_emails"] = AttributeValue.builder().s(it.first).build()
+            }
         }
 
 
 
         val expression = filterAttributes.keys.fold(""){ acc, s ->
             if(s.take(3) ==  ":ss")
-                acc + " and " +  s.drop(4) + " CONTAINS " + s
+                acc + " and contains(" +  s.drop(6) + ", $s)"
             else
                 acc + " and " + s.drop(1) + " = " + s
         }.drop(5)

@@ -20,16 +20,20 @@ object ValidationService {
                         .zip(10 downTo 2)
                         .fold(0){ acc, (c1, c2) -> acc + (c1 * c2)  }
 
-                val penulCalc = 11 - (penultTot % 11)
 
-                val lastTot = listOf(*digits.toTypedArray(), penulCalc)
+                val remainderPenult = penultTot % 11
+                val penultCalc = if (remainderPenult < 2) 0 else 11 - remainderPenult
+
+                val lastTot = listOf(*digits.toTypedArray(), penultCalc)
                         .zip(11 downTo 2)
                         .fold(0){ acc, (c1, c2) -> acc + (c1 * c2)  }
 
-                val lastCalc =  11 - (lastTot % 11)
+
+                val remainderLast = lastTot % 11
+                val lastCalc =  if (remainderLast < 2) 0 else 11 - remainderLast
 
 
-                return (penult == penulCalc && lastCalc == last)
+                return (penult == penultCalc && lastCalc == last)
 
             }
         }

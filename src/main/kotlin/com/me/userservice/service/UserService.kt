@@ -32,12 +32,11 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
     private fun validateUserFields(user: User): Flux<Void> {
 
         val now = LocalDate.now()
+        val between = ChronoUnit.YEARS.between(user.birthDate, now)
         return when {
             user.firstName.isEmpty() -> Flux.error(EmptyFirstNameException())
             user.lastName.isEmpty() -> Flux.error(EmptyLastNameException())
-            ChronoUnit.YEARS.between(user.birthDate, now) >= 100
-                    || user.birthDate.isAfter(now)
-                    || user.birthDate.isEqual(now)
+                    between >= 100 || between < 10
                     -> Flux.error(InvalidBirthDateException(user.birthDate))
             !ValidationService.isValidCpf(user.cpf) -> Flux.error(CPFInvalidException(user.cpf))
             // TODO email field validation

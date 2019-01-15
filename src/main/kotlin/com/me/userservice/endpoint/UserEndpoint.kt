@@ -3,6 +3,7 @@ package com.me.userservice.endpoint
 import com.me.userservice.endpoint.request.UserRequest
 import com.me.userservice.endpoint.response.UserResponse
 import com.me.userservice.endpoint.response.asResponse
+import com.me.userservice.extensions.toNullable
 import com.me.userservice.service.UserService
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -39,7 +40,13 @@ class UserEndpoint(private val userService: UserService) {
 
     fun list(req: ServerRequest): Mono<ServerResponse> {
 
-        val stream = userService.list().map { it.asResponse() }
+        val stream = userService.list(
+                cpf = req.queryParam("cpf").toNullable(),
+                firstName = req.queryParam("firstName").toNullable(),
+                lastName = req.queryParam("lastName").toNullable()
+
+
+        ).map { it.asResponse() }
 
         return ServerResponse
                 .ok()

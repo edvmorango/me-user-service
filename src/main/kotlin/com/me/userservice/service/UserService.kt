@@ -20,7 +20,7 @@ interface UserService {
 
     fun findByUuid(uuid: String): Mono<User>
 
-    fun list(): Flux<User>
+    fun list(cpf: String? = null , firstName: String? = null, lastName: String? = null,  phones: List<String>? = null, emails: List<String>? = null ): Flux<User>
 
 }
 
@@ -46,7 +46,7 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
 
                 val cpfExists = userRepository.findByCpf(user.cpf).flatMap{Mono.error<Void>(CPFAlreadyExistsException(user.cpf))}
 
-                Flux.merge(cpfExists, cpfExists)
+                Flux.merge(cpfExists)
 
             }
         }
@@ -70,7 +70,7 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
         return userRepository.findByUuid(uuid).map { it.asDomain() }
     }
 
-    override fun list(): Flux<User> {
-        return userRepository.list().map { it.asDomain() }
+    override fun list(cpf: String?, firstName: String?, lastName: String?, phones: List<String>?, emails: List<String>?): Flux<User> {
+        return userRepository.list(cpf, firstName, lastName, phones, emails).map { it.asDomain() }
     }
 }

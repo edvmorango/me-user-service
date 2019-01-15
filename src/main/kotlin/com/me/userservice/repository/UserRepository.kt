@@ -162,10 +162,10 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
 
         val expression = filterAttributes.keys.fold(""){ acc, s ->
             if(s.take(3) ==  ":ss")
-                acc + " " +  s.drop(4) + " CONTAINS " + s
+                acc + " and " +  s.drop(4) + " CONTAINS " + s
             else
-                acc + " " + s.drop(1) + " = " + s
-        }
+                acc + " and " + s.drop(1) + " = " + s
+        }.drop(5)
 
 
 

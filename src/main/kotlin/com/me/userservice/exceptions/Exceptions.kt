@@ -21,5 +21,5 @@ class EmptyAddressAddressException: RuntimeException("The nested field [address]
 class EmptyAddressNumberException: RuntimeException("The nested field [number] must be filled.")
 class EmptyAddressZipCodeException: RuntimeException("The nested field [zipCode] must be filled.")
 
-class PhoneNumberInvalidException(phones: List<String>):  RuntimeException("Some of the phones [${phones.joinToString()}] isn't valid.")
+class PhonesNumbersInvalidException(phones: List<String>):  RuntimeException("Some of the phones [${phones.joinToString()}] isn't valid.")
 

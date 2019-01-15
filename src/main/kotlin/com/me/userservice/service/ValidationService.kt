@@ -37,7 +37,13 @@ object ValidationService {
 
     }
 
+    fun isValidEmail(email: String): Boolean {
+        return email.matches(Regex.fromLiteral("*@*"))
+    }
 
 
+    fun isValidPhone(phone: String): Boolean {
+        return phone.length == 13 && phone.map { it.isDigit() }.reduce{ a, b -> a && b }
+    }
 
 }

@@ -36,21 +36,17 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
         return when {
             user.firstName.isEmpty() -> Flux.error(EmptyFirstNameException())
             user.lastName.isEmpty() -> Flux.error(EmptyLastNameException())
-                    between >= 100 || between < 10
+            user.emails.map { ValidationService.isValidEmail(it) }.reduce { a, b -> a && b } -> Flux.error(EmailsInvalidException(user.emails))
+            user.phones.map { ValidationService.isValidPhone(it) }.reduce { a, b -> a && b } -> Flux.error(PhonesNumbersInvalidException(user.emails))
+            between >= 100 || between < 10
                     -> Flux.error(InvalidBirthDateException(user.birthDate))
             !ValidationService.isValidCpf(user.cpf) -> Flux.error(CPFInvalidException(user.cpf))
-            // TODO email field validation
-            // TODO phone field validation
             else -> {
-
                 val cpfExists = userRepository.findByCpf(user.cpf).flatMap{Mono.error<Void>(CPFAlreadyExistsException(user.cpf))}
-
-                Flux.merge(cpfExists)
-
+                val emailsExists = userRepository.list(emails = user.emails).flatMap{Mono.error<Void>(EmailsAlreadyExistsException(user.emails))}
+                Flux.merge(cpfExists, emailsExists)
             }
         }
-
-
 
     }
 

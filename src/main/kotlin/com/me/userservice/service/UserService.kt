@@ -96,18 +96,28 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
     }
 
     override fun findByUuid(uuid: String): Mono<User> {
-        return userRepository.findByUuid(uuid).map { it.asDomain() }
+        return userRepository
+                .findByUuid(uuid)
+                .map { it.asDomain() }
+                .switchIfEmpty(Mono.error(UserNotFoundException()))
     }
 
     override fun list(cpf: String?, firstName: String?, lastName: String?, phones: List<String>?, emails: List<String>?): Flux<User> {
-        return userRepository.list(cpf, firstName, lastName, phones, emails).map { it.asDomain() }
+        return userRepository
+                .list(cpf, firstName, lastName, phones, emails)
+                .map { it.asDomain() }
     }
 
     override fun update(uuid: String, user: User): Mono<User> {
-        return userRepository.update(user.copy(uuid = uuid).asItem()).map { it.asDomain() }
+        return findByUuid(uuid)
+                .switchIfEmpty(Mono.error(UserNotFoundException()))
+                .flatMap { userRepository
+                            .update(user.copy(uuid = uuid).asItem())
+                            .map { it.asDomain() }
+        }
     }
 
     override fun delete(uuid: String): Mono<Unit> {
-        return userRepository.delete(uuid)
+        return findByUuid(uuid).flatMap { userRepository.delete(uuid) }
     }
 }

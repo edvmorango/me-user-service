@@ -104,7 +104,7 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
     }
 
     override fun update(uuid: String, user: User): Mono<User> {
-        return userRepository.update(user.asItem()).map { it.asDomain() }
+        return userRepository.update(user.copy(uuid = uuid).asItem()).map { it.asDomain() }
     }
 
     override fun delete(uuid: String): Mono<Unit> {

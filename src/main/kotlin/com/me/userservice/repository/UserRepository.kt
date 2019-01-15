@@ -186,11 +186,18 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
     override fun update(userItem: UserItem): Mono<UserItem> {
         val key = singletonMap("uuid", AttributeValue.builder().s(userItem.uuid).build())
 
+        val attributes = userRequestBuilder(userItem)
+                .filterNot { it.key == "uuid" }
+                .mapValues { AttributeValueUpdate
+                        .builder()
+                        .value(it.value)
+                        .build() }
+
         val request = UpdateItemRequest
                 .builder()
                 .tableName(tableName)
                 .key(key)
-                .attributeUpdates(userRequestBuilder(userItem).mapValues { AttributeValueUpdate.builder().value(it.value).build() })
+                .attributeUpdates(attributes)
                 .build()
 
         return Mono.fromFuture(client.updateItem(request)).map { userItem }

@@ -32,6 +32,9 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
 
         val now = LocalDate.now()
         val between = ChronoUnit.YEARS.between(user.birthDate, now)
+
+        val address = user.address
+
         return when {
             user.firstName.isEmpty() ->
                 Mono.error(EmptyFirstNameException())
@@ -45,6 +48,16 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
                 Mono.error(PhonesNumbersInvalidException(user.emails))
             between >= 100 || between < 10 ->
                 Mono.error(InvalidBirthDateException(user.birthDate))
+            address.address.isEmpty() ->
+                Mono.error(EmptyAddressException())
+            address.number <= 0 ->
+                Mono.error(InvalidAddressNumberException(address.number))
+            !address.zipCode.map {it.isDigit()}.fold(true){a , b -> a && b} && address.zipCode.toLong() <= 0 ->
+                Mono.error(InvalidAddressZipCodeException(address.zipCode))
+
+
+
+
             else ->
                 Mono.just(user)
         }

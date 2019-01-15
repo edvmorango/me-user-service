@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.dynamodb.model.*
 import software.amazon.awssdk.services.dynamodb.model.ComparisonOperator.*
 import java.util.*
 import java.util.Collections.*
+import kotlin.collections.HashMap
 
 
 interface UserRepository {
@@ -21,7 +22,7 @@ interface UserRepository {
 
     fun findByCpf(cpf: String): Mono<UserItem>
 
-    fun list(): Flux<UserItem>
+    fun list(cpf: String? = null , firstName: String? = null, lastName: String? = null,  phones: List<String>? = null, emails: List<String>? = null ): Flux<UserItem>
 }
 
 class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepository {
@@ -130,15 +131,50 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
 
     }
 
-    override fun list(): Flux<UserItem> {
+    override fun list(cpf: String?, firstName: String?, lastName: String?, phones: List<String>?, emails: List<String>? ): Flux<UserItem> {
 
-        val attributeValue = singletonMap(":active", AttributeValue.builder().bool(true).build())
+        val filterAttributes = HashMap<String, AttributeValue?>()
+
+        filterAttributes[":active"] = AttributeValue.builder().bool(true).build()
+
+
+        if(cpf != null) {
+            filterAttributes[":cpf"] = AttributeValue.builder().s(cpf).build()
+        }
+
+        if(firstName != null) {
+            filterAttributes[":firstName"] = AttributeValue.builder().s(firstName).build()
+        }
+
+        if(lastName != null) {
+            filterAttributes[":lastName"] = AttributeValue.builder().s(lastName).build()
+        }
+
+        if(phones != null) {
+            filterAttributes[":ss_phones"] = AttributeValue.builder().ss(phones).build()
+        }
+
+        if(emails != null) {
+            filterAttributes[":ss_emails"] = AttributeValue.builder().ss(emails).build()
+        }
+
+
+
+        val expression = filterAttributes.keys.fold(""){ acc, s ->
+            if(s.take(3) ==  ":ss")
+                acc + " " +  s.drop(4) + " CONTAINS " + s
+            else
+                acc + " " + s.drop(1) + " = " + s
+        }
+
+
+
 
         val request = ScanRequest
                 .builder()
                 .tableName(tableName)
-                .filterExpression("active = :active")
-                .expressionAttributeValues(attributeValue)
+                .filterExpression(expression)
+                .expressionAttributeValues(filterAttributes)
                 .build()
 
         return Flux.from(client.scanPaginator(request).items()).map { toItem(it) }

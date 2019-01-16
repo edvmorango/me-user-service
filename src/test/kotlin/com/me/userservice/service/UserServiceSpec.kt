@@ -229,7 +229,7 @@ class UserServiceSpec{
 
             val user = userService.create(validUser).block()!!
 
-            userService.delete(user.uuid!!)
+            userService.delete(user.uuid!!).block()
 
             assert(validUser.copy(uuid = user.uuid) == user)
 
@@ -243,7 +243,7 @@ class UserServiceSpec{
 
             val updatedUser = userService.update(user.uuid!!, user.copy(phones = listOf("52491301924"))).block()!!
 
-            userService.delete(user.uuid!!)
+            userService.delete(user.uuid!!).block()
 
 
             assert(user.phones != updatedUser.phones)
@@ -258,7 +258,7 @@ class UserServiceSpec{
 
             val updatedUser = userService.update(user.uuid!!, user.copy(phones = validUser.phones + listOf("52491301924") )).block()!!
 
-            userService.delete(user.uuid!!)
+            userService.delete(user.uuid!!).block()
 
             assert(updatedUser.phones.size > user.phones.size)
 
@@ -273,7 +273,7 @@ class UserServiceSpec{
 
             val updatedUser = userService.update(user.uuid!!, user.copy(emails = listOf("asz@gmail.com"))).block()!!
 
-            userService.delete(user.uuid!!)
+            userService.delete(user.uuid!!).block()
 
 
             assert(user.emails != updatedUser.emails)
@@ -288,7 +288,7 @@ class UserServiceSpec{
 
             val updatedUser = userService.update(user.uuid!!, user.copy(emails = validUser.emails + listOf("asz@gmail.com") )).block()!!
 
-            userService.delete(user.uuid!!)
+            userService.delete(user.uuid!!).block()
 
             assert(updatedUser.emails.size > user.emails.size)
 
@@ -304,7 +304,7 @@ class UserServiceSpec{
 
             val updatedUser = userService.update(user.uuid!!, user.copy(firstName = "Updated name")).block()!!
 
-            userService.delete(user.uuid!!)
+            userService.delete(user.uuid!!).block()
 
 
             assert(user.firstName != updatedUser.firstName)
@@ -319,7 +319,7 @@ class UserServiceSpec{
 
             val updatedUser = userService.update(user.uuid!!, user.copy(lastName = "Updated last name")).block()!!
 
-            userService.delete(user.uuid!!)
+            userService.delete(user.uuid!!).block()
 
 
             assert(user.lastName != updatedUser.lastName)
@@ -334,7 +334,7 @@ class UserServiceSpec{
 
             val updatedUser = userService.update(user.uuid!!, user.copy(birthDate = LocalDate.now().minusYears(15))).block()!!
 
-            userService.delete(user.uuid!!)
+            userService.delete(user.uuid!!).block()
 
 
             assert(user.birthDate != updatedUser.birthDate)
@@ -352,7 +352,7 @@ class UserServiceSpec{
 
             val updatedUser = userService.update(user.uuid!!, user.copy(address = address)).block()!!
 
-            userService.delete(user.uuid!!)
+            userService.delete(user.uuid!!).block()
 
             assert(user.address.address != updatedUser.address.address)
 
@@ -370,7 +370,7 @@ class UserServiceSpec{
 
             val updatedUser = userService.update(user.uuid!!, user.copy(address = address)).block()!!
 
-            userService.delete(user.uuid!!)
+            userService.delete(user.uuid!!).block()
 
 
             assert(user.address.number != updatedUser.address.number)
@@ -389,12 +389,67 @@ class UserServiceSpec{
 
             val updatedUser = userService.update(user.uuid!!, user.copy(address = address)).block()!!
 
-            userService.delete(user.uuid!!)
+            userService.delete(user.uuid!!).block()
 
             assert(user.address.zipCode != updatedUser.address.zipCode)
 
 
         }
+
+        @Test
+        @DisplayName("Should delete a user")
+        fun test12() {
+
+            val user = userService.create(validUser).block()!!
+
+            userService.delete(user.uuid!!).block()
+
+            assertThrows<UserNotFoundException> { userService.findByUuid(user.uuid!!).block() }
+        }
+
+
+        @Test
+        @DisplayName("Should find a user by CPF")
+        fun test13() {
+
+            val user = userService.create(validUser).block()!!
+
+            val foundUser = userService.list(cpf = user.cpf).blockFirst()
+
+            userService.delete(user.uuid!!).block()
+
+            assert(foundUser == user)
+
+        }
+
+        @Test
+        @DisplayName("Should find a user by firstName")
+        fun test14() {
+
+            val user = userService.create(validUser).block()!!
+
+            val foundUser = userService.list(firstName = user.firstName).blockFirst()
+
+            userService.delete(user.uuid!!).block()
+
+            assert(foundUser == user)
+
+        }
+
+        @Test
+        @DisplayName("Should find a user by lastName")
+        fun test15() {
+
+            val user = userService.create(validUser).block()!!
+
+            val foundUser = userService.list(lastName = user.lastName).blockFirst()
+
+            userService.delete(user.uuid!!).block()
+
+            assert(foundUser == user)
+
+        }
+
 
     }
 

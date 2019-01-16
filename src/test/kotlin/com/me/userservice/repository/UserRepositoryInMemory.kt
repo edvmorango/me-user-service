@@ -6,10 +6,25 @@ import reactor.core.publisher.toMono
 
 class UserRepositoryInMemory : UserRepository {
 
-    private var database =  HashMap<String, UserItem>()
+    val defaultUserItem =  UserItem(
+            uuid =  "default",
+            firstName =  "default user",
+            lastName =  "default lastname",
+            cpf =  "22530915296",
+            birthDate =  "1996-10-10",
+            address =  AddressItem("Some address", 199, "19125513"),
+            emails =  listOf("default@mail.com"),
+            phones =  listOf("00000000000"),
+            active =  true)
+
+
+    private var database : HashMap<String, UserItem> = hashMapOf(Pair("default", defaultUserItem))
+
+
+
+
 
     override fun create(userItem: UserItem): Mono<UserItem> {
-
         database[userItem.uuid] = userItem
 
         return userItem.toMono()

@@ -17,8 +17,19 @@ class UserRepositoryInMemory : UserRepository {
             phones =  listOf("00000000000"),
             active =  true)
 
+    val duplicateUserItem =  UserItem(
+            uuid =  "duplicate",
+            firstName =  "default user",
+            lastName =  "default lastname",
+            cpf =  "37321555526",
+            birthDate =  "1996-10-10",
+            address =  AddressItem("Some address 2", 200, "12005110"),
+            emails =  listOf("duplicate@mail.com"),
+            phones =  listOf("11111111111"),
+            active =  true)
 
-    private var database : HashMap<String, UserItem> = hashMapOf(Pair("default", defaultUserItem))
+
+    private var database : HashMap<String, UserItem> = hashMapOf(Pair("default", defaultUserItem), Pair("duplicate", duplicateUserItem))
 
 
 
@@ -37,8 +48,9 @@ class UserRepositoryInMemory : UserRepository {
     }
 
     override fun findByCpf(cpf: String): Mono<UserItem> {
+        val item = database.values.filter { it.cpf == cpf}.firstOrNull()
 
-        return Mono.justOrEmpty(database.filter { it.value.cpf == cpf}.values.firstOrNull())
+        return Mono.justOrEmpty(item)
 
     }
 
@@ -47,17 +59,16 @@ class UserRepositoryInMemory : UserRepository {
         var values = database.values.filter { it.active }
 
         if(cpf != null)
-            values.filter { it.cpf == cpf }
+            values = values.filter { it.cpf == cpf }
 
         if(firstName != null)
-            values.filter { it.firstName == firstName }
+            values = values.filter { it.firstName == firstName }
 
         if(lastName != null)
-            values.filter { it.lastName == lastName }
+            values = values.filter { it.lastName == lastName }
 
-        if(emails != null) {
-            values.filter { u ->  emails.map { u.emails.contains(it)}.fold(true){a,b -> a && b}  }
-        }
+        if(emails != null)
+            values = values.filterNot { it.emails.intersect(emails).isEmpty() }
 
         return Flux.fromArray(values.toTypedArray())
     }

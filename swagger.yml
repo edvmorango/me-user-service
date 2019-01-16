@@ -7,7 +7,6 @@ basePath: "/v1"
 tags:
 - name: "user"
 schemes:
-- "https"
 - "http"
 paths:
   /user:
@@ -19,22 +18,22 @@ paths:
       operationId: "create"
       consumes:
       - "application/json"
-      - "application/xml"
       produces:
-      - "application/xml"
-      - "application/json"
+      - "application/stream+json"
       parameters:
       - in: "body"
         name: "body"
-        description: "Pet object that needs to be added to the store"
+        description: "User object"
         required: true
         schema:
           $ref: "#/definitions/User"
       responses:
         201:
-          $ref: "#/definitions/User"
-        401:
-          description: ""
+          description: "User created"
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: "Bad request"
     get:
       tags:
       - "user"
@@ -45,13 +44,9 @@ paths:
       - "application/stream+json"
       responses:
         200:
-          description: "successful operation"
+          description: "Streaming Users"
           schema:
             $ref: "#/definitions/User"
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
   /user/{userUuid}:
     get:
       tags:
@@ -70,15 +65,15 @@ paths:
         format: "int64"
       responses:
         200:
-          description: ""
+          description: "User found"
           schema:
             $ref: "#/definitions/User"
         404:
-          description: ""
+          description: "Not found"
     put:
       tags:
       - "user"
-      summary: "Updates a pet in the store with form data"
+      summary: "Update User data"
       description: ""
       operationId: "update"
       consumes:
@@ -92,25 +87,21 @@ paths:
         required: true
         type: "integer"
         format: "int64"
-      - name: "name"
-        in: "formData"
-        description: "Updated name of the pet"
-        required: false
-        type: "string"
-      - name: "status"
-        in: "formData"
-        description: "Updated status of the pet"
-        required: false
-        type: "string"
       responses:
-        405:
-          description: "Invalid input"
+        200:
+          description: "User updated"
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: "Bad request"
+        404:
+          description: "Not found"
 
     delete:
       tags:
       - "user"
-      summary: "Deletes a pet"
-      description: ""
+      summary: "Deletes a user"
+      description: "Logical exclusion"
       operationId: "delete"
       parameters:
       - name: "userUuid"
@@ -118,25 +109,11 @@ paths:
         required: true
         type: "string"
       responses:
-        400:
-          description: "Invalid ID supplied"
+        204:
+          description: "User deleted"
         404:
-          description: "Pet not found"
+          description: "Not found"
 
-
-
-securityDefinitions:
-  petstore_auth:
-    type: "oauth2"
-    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
-    flow: "implicit"
-    scopes:
-      write:pets: "modify pets in your account"
-      read:pets: "read your pets"
-  api_key:
-    type: "apiKey"
-    name: "api_key"
-    in: "header"
 definitions:
   Address:
     type: "object"
@@ -171,5 +148,3 @@ definitions:
         items:
           type: "string"
 
-    xml:
-      name: "User"

@@ -294,6 +294,108 @@ class UserServiceSpec{
 
         }
 
+
+
+        @Test
+        @DisplayName("Should update firstName of a valid user")
+        fun test6() {
+
+            val user = userService.create(validUser).block()!!
+
+            val updatedUser = userService.update(user.uuid!!, user.copy(firstName = "Updated name")).block()!!
+
+            userService.delete(user.uuid!!)
+
+
+            assert(user.firstName != updatedUser.firstName)
+
+        }
+
+        @Test
+        @DisplayName("Should update lastName of a valid user")
+        fun test7() {
+
+            val user = userService.create(validUser).block()!!
+
+            val updatedUser = userService.update(user.uuid!!, user.copy(lastName = "Updated last name")).block()!!
+
+            userService.delete(user.uuid!!)
+
+
+            assert(user.lastName != updatedUser.lastName)
+
+        }
+
+        @Test
+        @DisplayName("Should update birthDate of a valid user")
+        fun test8() {
+
+            val user = userService.create(validUser).block()!!
+
+            val updatedUser = userService.update(user.uuid!!, user.copy(birthDate = LocalDate.now().minusYears(15))).block()!!
+
+            userService.delete(user.uuid!!)
+
+
+            assert(user.birthDate != updatedUser.birthDate)
+
+        }
+
+
+        @Test
+        @DisplayName("Should update address of a valid user")
+        fun test9() {
+
+            val user = userService.create(validUser).block()!!
+
+            val address = validUser.address.copy(address = "new address")
+
+            val updatedUser = userService.update(user.uuid!!, user.copy(address = address)).block()!!
+
+            userService.delete(user.uuid!!)
+
+            assert(user.address.address != updatedUser.address.address)
+
+        }
+
+
+
+        @Test
+        @DisplayName("Should update address number of a valid user")
+        fun test10() {
+
+            val user = userService.create(validUser).block()!!
+
+            val address = validUser.address.copy(number = 9999)
+
+            val updatedUser = userService.update(user.uuid!!, user.copy(address = address)).block()!!
+
+            userService.delete(user.uuid!!)
+
+
+            assert(user.address.number != updatedUser.address.number)
+
+        }
+
+
+
+        @Test
+        @DisplayName("Should update address zipCode of a valid user")
+        fun test11() {
+
+            val user = userService.create(validUser).block()!!
+
+            val address = validUser.address.copy(zipCode = "0001234")
+
+            val updatedUser = userService.update(user.uuid!!, user.copy(address = address)).block()!!
+
+            userService.delete(user.uuid!!)
+
+            assert(user.address.zipCode != updatedUser.address.zipCode)
+
+
+        }
+
     }
 
 }

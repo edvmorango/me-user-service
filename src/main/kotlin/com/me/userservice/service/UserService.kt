@@ -90,29 +90,29 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
 
     }
 
-    private fun validateUserUpdate(curr: User, updated: User): Mono<User> {
+    private fun validateUserUpdate(new: User, current: User): Mono<User> {
 
         val cpfExists =
-                if(curr.cpf == updated.cpf)
-                    updated.toMono()
+                if(new.cpf == current.cpf)
+                    new.toMono()
                 else
                      userRepository
-                             .findByCpf(updated.cpf)
-                             .flatMap{ Mono.error<User>(CPFAlreadyExistsException(updated.cpf)) }
+                             .findByCpf(current.cpf)
+                             .flatMap{ Mono.error<User>(CPFAlreadyExistsException(current.cpf)) }
 
-        val filteredEmails = updated.emails.filterNot { curr.emails.contains(it)}
+        val filteredEmails = new.emails.filterNot { current.emails.contains(it)}
 
         val emailExists =
                 if(filteredEmails.isEmpty())
-                    Flux.just(updated)
+                    Flux.just(current)
                 else
                     userRepository
                             .list(emails = filteredEmails)
-                            .flatMap { Mono.error<User>(EmailsAlreadyExistsException(updated.emails)) }
+                            .flatMap { Mono.error<User>(EmailsAlreadyExistsException(current.emails)) }
 
         return Flux
                 .merge(cpfExists, emailExists)
-                .then(Mono.just(updated))
+                .then(Mono.just(current))
 
 
     }

@@ -29,7 +29,7 @@ class UserServiceSpec{
 
     @Nested
     @DisplayName("FieldValidations")
-    inner class FieldValidation() {
+    inner class FieldValidation {
 
         private val defaultUuid = userRepository.defaultUserItem.uuid
 
@@ -207,7 +207,7 @@ class UserServiceSpec{
         }
 
         @Test
-        @DisplayName("Shouldn't ignore conflicts when checking `himself` before update ")
+        @DisplayName("Should ignore conflicts when checking `himself` before update ")
         fun test5() {
 
             val update = userService.update(duplicateUuid, validUser.copy(cpf = duplicateCpf, emails = duplicateEmail)).block()
@@ -215,6 +215,84 @@ class UserServiceSpec{
             assert(update != null)
         }
 
+
+    }
+
+    @Nested
+    @DisplayName("Actions")
+    inner class Actions{
+
+
+        @Test
+        @DisplayName("Should generate a uuid when create a valid user")
+        fun test1() {
+
+            val user = userService.create(validUser).block()!!
+
+            userService.delete(user.uuid!!)
+
+            assert(validUser.copy(uuid = user.uuid) == user)
+
+        }
+
+        @Test
+        @DisplayName("Should update phone of a valid user")
+        fun test2() {
+
+            val user = userService.create(validUser).block()!!
+
+            val updatedUser = userService.update(user.uuid!!, user.copy(phones = listOf("52491301924"))).block()!!
+
+            userService.delete(user.uuid!!)
+
+
+            assert(user.phones != updatedUser.phones)
+
+        }
+
+        @Test
+        @DisplayName("Should add a phone to a valid user")
+        fun test3() {
+
+            val user = userService.create(validUser).block()!!
+
+            val updatedUser = userService.update(user.uuid!!, user.copy(phones = validUser.phones + listOf("52491301924") )).block()!!
+
+            userService.delete(user.uuid!!)
+
+            assert(updatedUser.phones.size > user.phones.size)
+
+        }
+
+
+        @Test
+        @DisplayName("Should update email of a valid user")
+        fun test4() {
+
+            val user = userService.create(validUser).block()!!
+
+            val updatedUser = userService.update(user.uuid!!, user.copy(emails = listOf("asz@gmail.com"))).block()!!
+
+            userService.delete(user.uuid!!)
+
+
+            assert(user.emails != updatedUser.emails)
+
+        }
+
+        @Test
+        @DisplayName("Should add a email to a valid user")
+        fun test5() {
+
+            val user = userService.create(validUser).block()!!
+
+            val updatedUser = userService.update(user.uuid!!, user.copy(emails = validUser.emails + listOf("asz@gmail.com") )).block()!!
+
+            userService.delete(user.uuid!!)
+
+            assert(updatedUser.emails.size > user.emails.size)
+
+        }
 
     }
 

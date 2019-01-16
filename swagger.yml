@@ -1,0 +1,175 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: "User Service"
+host: "user-service"
+basePath: "/v1"
+tags:
+- name: "user"
+schemes:
+- "https"
+- "http"
+paths:
+  /user:
+    post:
+      tags:
+      - "user"
+      summary: "Add User(s)"
+      description: ""
+      operationId: "create"
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Pet object that needs to be added to the store"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        201:
+          $ref: "#/definitions/User"
+        401:
+          description: ""
+    get:
+      tags:
+      - "user"
+      summary: "List users"
+      description: "Returns users as "
+      operationId: "list"
+      produces:
+      - "application/stream+json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Pet not found"
+  /user/{userUuid}:
+    get:
+      tags:
+      - "user"
+      summary: "Find user by Uuid"
+      description: "Returns a single user"
+      operationId: "findByUuid"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "userUuid"
+        in: "path"
+        description: "ID of pet to return"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: "#/definitions/User"
+        404:
+          description: ""
+    put:
+      tags:
+      - "user"
+      summary: "Updates a pet in the store with form data"
+      description: ""
+      operationId: "update"
+      consumes:
+      - "application/x-www-form-urlencoded"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "userUuid"
+        in: "path"
+        description: "ID of pet that needs to be updated"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "name"
+        in: "formData"
+        description: "Updated name of the pet"
+        required: false
+        type: "string"
+      - name: "status"
+        in: "formData"
+        description: "Updated status of the pet"
+        required: false
+        type: "string"
+      responses:
+        405:
+          description: "Invalid input"
+
+    delete:
+      tags:
+      - "user"
+      summary: "Deletes a pet"
+      description: ""
+      operationId: "delete"
+      parameters:
+      - name: "userUuid"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Pet not found"
+
+
+
+securityDefinitions:
+  petstore_auth:
+    type: "oauth2"
+    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
+    flow: "implicit"
+    scopes:
+      write:pets: "modify pets in your account"
+      read:pets: "read your pets"
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  Address:
+    type: "object"
+    properties:
+      address:
+        type: "string"
+        format: "int64"
+      number:
+        type: "integer"
+      zipCode:
+        type: "string"
+  User:
+    type: "object"
+    properties:
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      cpf:
+        type: "string"
+      birthDate:
+        type: "string"
+        format: "date"
+      address:
+        $ref: "#/definitions/Address"
+      emails:
+        type: "array"
+        items:
+          type: "string"
+      phones:
+        type: "array"
+        items:
+          type: "string"
+
+    xml:
+      name: "User"

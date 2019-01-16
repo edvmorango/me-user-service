@@ -1,7 +1,11 @@
 package com.me.userservice.service
 
+import java.util.regex.Pattern
+
 
 object ValidationService {
+
+    private val emailRegex = Pattern.compile("^(.+)@(.+)\$")
 
 
     fun isValidCpf(cpf: String): Boolean {
@@ -42,7 +46,7 @@ object ValidationService {
     }
 
     fun isValidEmail(email: String): Boolean {
-        return email.matches(Regex.fromLiteral("*@*"))
+        return emailRegex.matcher(email).matches()
     }
 
 

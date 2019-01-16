@@ -47,7 +47,7 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
                 Mono.error(EmptyLastNameException())
             !ValidationService.isValidCpf(user.cpf) ->
                 Mono.error(CPFInvalidException(user.cpf))
-            user.emails.map { ValidationService.isValidEmail(it) }.fold(true){ a, b -> a && b } ->
+            !user.emails.map { ValidationService.isValidEmail(it) }.fold(true){ a, b -> a && b } ->
                 Mono.error(EmailsInvalidException(user.emails))
             user.phones.map { ValidationService.isValidPhone(it) }.fold(true){ a, b -> a && b } ->
                 Mono.error(PhonesNumbersInvalidException(user.emails))

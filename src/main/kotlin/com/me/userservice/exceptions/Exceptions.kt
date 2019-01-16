@@ -15,6 +15,8 @@ class CPFInvalidException(cpf: String): FieldException("The CPF [$cpf] is invali
 
 class EmailsAlreadyExistsException(emails: List<String>): ConflictException("Some of the emails [${emails.joinToString()}] already exists.")
 class EmailsInvalidException(phones: List<String>):  FieldException("Some of the emails [${phones.joinToString()}] isn't valid.")
+class EmptyEmailsException:  FieldException("The field [emails] must contains at least one element.")
+
 
 class EmptyFirstNameException: FieldException("The field [firstName] must be filled.")
 class EmptyLastNameException: FieldException("The field [lastName] must be filled.")
@@ -26,4 +28,5 @@ class InvalidAddressNumberException(number: Int): FieldException("The number [$n
 class InvalidAddressZipCodeException(zipCode: String): FieldException("The zipCode [$zipCode] is invalid.")
 
 class PhonesNumbersInvalidException(phones: List<String>):  FieldException("Some of the phones [${phones.joinToString()}] isn't valid.")
+class EmptyPhonesException:  FieldException("The field [phones] must contains at least one element.")
 

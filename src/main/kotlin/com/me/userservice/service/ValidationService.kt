@@ -51,7 +51,7 @@ object ValidationService {
 
 
     fun isValidPhone(phone: String): Boolean {
-        return phone.length == 13 && phone.map { it.isDigit() }.reduce{ a, b -> a && b }
+        return phone.length == 11 && phone.map { it.isDigit() }.reduce{ a, b -> a && b }
     }
 
 }

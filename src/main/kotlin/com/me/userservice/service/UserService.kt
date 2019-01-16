@@ -47,9 +47,13 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
                 Mono.error(EmptyLastNameException())
             !ValidationService.isValidCpf(user.cpf) ->
                 Mono.error(CPFInvalidException(user.cpf))
-            !user.emails.map { ValidationService.isValidEmail(it) }.fold(true){ a, b -> a && b } ->
+            user.emails.isEmpty() ->
+                Mono.error(EmptyEmailsException())
+            user.emails.map { !ValidationService.isValidEmail(it) }.fold(false){ a, b -> a || b } ->
                 Mono.error(EmailsInvalidException(user.emails))
-            user.phones.map { ValidationService.isValidPhone(it) }.fold(true){ a, b -> a && b } ->
+            user.phones.isEmpty() ->
+                Mono.error(EmptyPhonesException())
+            user.phones.map { !ValidationService.isValidPhone(it) }.fold(false){ a, b -> a || b } ->
                 Mono.error(PhonesNumbersInvalidException(user.emails))
             between >= 100 || between < 10 ->
                 Mono.error(InvalidBirthDateException(user.birthDate))
@@ -57,7 +61,9 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
                 Mono.error(EmptyAddressException())
             address.number <= 0 ->
                 Mono.error(InvalidAddressNumberException(address.number))
-            !address.zipCode.map {it.isDigit()}.fold(true){a , b -> a && b} && address.zipCode.toLong() <= 0 ->
+            !address.zipCode.map {it.isDigit()}.fold(true){a , b -> a && b}  || address.zipCode.isEmpty() ->
+                Mono.error(InvalidAddressZipCodeException(address.zipCode))
+            address.zipCode.toLong() <= 0 ->
                 Mono.error(InvalidAddressZipCodeException(address.zipCode))
 
 

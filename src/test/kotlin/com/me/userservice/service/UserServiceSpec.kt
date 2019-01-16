@@ -24,7 +24,7 @@ class UserServiceSpec{
             LocalDate.of(1996,6,10),
             validAddress,
             listOf("jevmor@gmail.com", "jevmorr@gmail.com"),
-            listOf("92991179336"),
+            listOf("92991179136"),
             true)
 
     @Test
@@ -96,9 +96,9 @@ class UserServiceSpec{
 
 
     @Test
-    @DisplayName("Shouldn't create a user without email")
+    @DisplayName("Shouldn't create a user without a email")
     fun test8() {
-        assertThrows<EmailsInvalidException> { userService.create(validUser.copy(emails = listOf())).block()  }
+        assertThrows<EmptyEmailsException> { userService.create(validUser.copy(emails = listOf())).block()  }
     }
 
 
@@ -110,9 +110,9 @@ class UserServiceSpec{
 
 
     @Test
-    @DisplayName("Shouldn't create a user with a empty phone")
+    @DisplayName("Shouldn't create a user without a  phone")
     fun test11() {
-        assertThrows<PhonesNumbersInvalidException> { userService.create(validUser.copy(phones = listOf())).block()  }
+        assertThrows<EmptyPhonesException> { userService.create(validUser.copy(phones = listOf())).block()  }
     }
 
     @Test

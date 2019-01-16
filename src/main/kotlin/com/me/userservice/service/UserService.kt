@@ -84,6 +84,33 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
 
     }
 
+    private fun validateUserUpdate(curr: User, updated: User): Mono<User> {
+
+        val cpfExists =
+                if(curr.cpf == updated.cpf)
+                    updated.toMono()
+                else
+                     userRepository
+                             .findByCpf(updated.cpf)
+                             .flatMap{ Mono.error<User>(CPFAlreadyExistsException(updated.cpf)) }
+
+        val filteredEmails = updated.emails.filterNot { curr.emails.contains(it)}
+
+        val emailExists =
+                if(filteredEmails.isEmpty())
+                    Flux.just(updated)
+                else
+                    userRepository
+                            .list(emails = filteredEmails)
+                            .flatMap { Mono.error<User>(EmailsAlreadyExistsException(updated.emails)) }
+
+        return Flux
+                .merge(cpfExists, emailExists)
+                .then(Mono.just(updated))
+
+
+    }
+
     override fun create(user: User): Mono<User> {
 
         return validateUserFields(user)
@@ -112,10 +139,10 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
         return userRepository
                 .findByUuid(uuid)
                 .switchIfEmpty(Mono.error(UserNotFoundException()))
+                .flatMap { currItem ->  validateUserFields(user).flatMap { validateUserUpdate(user, currItem.asDomain()) } }
                 .flatMap { userRepository
                             .update(user.copy(uuid = uuid).asItem())
                             .map { u -> u.asDomain() }
-
                 }
     }
 

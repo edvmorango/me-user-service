@@ -37,8 +37,13 @@ dependencies {
 	implementation "org.jetbrains.kotlin:kotlin-reflect"
 	implementation "software.amazon.awssdk:dynamodb:2.3.0"
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+
+    testCompile('org.junit.jupiter:junit-jupiter-api:5.3.2')
+	testRuntime('org.junit.jupiter:junit-jupiter-engine:5.3.2')
+
+
 }
 
 compileKotlin {

@@ -2,6 +2,12 @@
 
 This project aims maintain users.
 
+##TODOS
+
+* Logging
+* Better configuration
+* Better deploy
+
 ### Prerequisites
 
 Follow the instructions in the root project, before continue.

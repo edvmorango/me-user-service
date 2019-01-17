@@ -51,4 +51,9 @@ Environments:
 gradle test
 ```
 
+### Running
+
+For informations copy *swagger.yml* to: ```https://editor.swagger.io/```
+
+The base path is: *localhost:8080*
 

@@ -13,6 +13,7 @@ This project aims maintain users.
 Follow the instructions in the root project, before continue.
 
 * JDK 8/11
+* Kotlin
 * Gradle
 * docker
 * docker-compose

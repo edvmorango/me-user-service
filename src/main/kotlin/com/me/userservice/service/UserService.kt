@@ -100,10 +100,11 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
                              .findByCpf(current.cpf)
                              .flatMap{ Mono.error<User>(CPFAlreadyExistsException(current.cpf)) }
 
-        val filteredEmails = new.emails.filterNot { current.emails.contains(it)}
+        val intersection = new.emails.intersect(current.emails)
+        val filteredEmails =  new.emails.filterNot{ intersection.contains(it) }
 
         val emailExists =
-                if(filteredEmails.isEmpty())
+                if(intersection.containsAll(new.emails))
                     Flux.just(current)
                 else
                     userRepository

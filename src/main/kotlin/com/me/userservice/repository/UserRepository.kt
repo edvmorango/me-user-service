@@ -73,8 +73,8 @@ class UserRepositoryDynamoDB(private val client: DynamoDbAsyncClient) : UserRepo
                 dic["cpf"]!!.s(),
                 dic["birthDate"]!!.s(),
                 address,
-                dic["phones"]!!.ss(),
                 dic["emails"]!!.ss(),
+                dic["phones"]!!.ss(),
                 dic["active"]!!.bool())
 
     }

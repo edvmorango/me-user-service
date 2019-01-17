@@ -119,7 +119,34 @@ class UserEndpointSpec: IntegrationBaseSpec() {
 
     }
 
+    @Test
+    @DisplayName("Should create many users at same time and list for firstName")
+    fun test4(){
 
+        val validRequestUser1 =  validRequestUser.copy(firstName = "John" ,cpf = "64284761188", emails = listOf("somemail1@4mail.com"))
+
+        val validRequestUser2 = validRequestUser.copy(firstName = "John", cpf = "61183327897", emails = listOf("somemail2@4mail.com"))
+        val body = listOf(validRequestUser1, validRequestUser2)
+
+        client
+                .post()
+                .uri("$contextPath/user")
+                .contentType(MediaType.APPLICATION_JSON)
+                .syncBody(body)
+                .exchange()
+                .expectStatus()
+                .isCreated
+
+        client
+                .get()
+                .uri("$contextPath/user?firstName=${validRequestUser1.firstName}")
+                .exchange()
+                .expectStatus()
+                .isOk
+                .expectBodyList<UserResponse>().hasSize(2)
+
+
+    }
 
 
 

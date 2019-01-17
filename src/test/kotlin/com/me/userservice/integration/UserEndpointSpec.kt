@@ -149,5 +149,67 @@ class UserEndpointSpec: IntegrationBaseSpec() {
     }
 
 
+    @Test
+    @DisplayName("Should create many users at same time and list for lastName")
+    fun test5(){
+
+        val validRequestUser1 =  validRequestUser.copy(lastName = "Doe" ,cpf = "16498430460", emails = listOf("doe@5mail.com"))
+
+        val validRequestUser2 = validRequestUser.copy(lastName = "Doe", cpf = "31765057795", emails = listOf("doe2@5mail.com"))
+
+        val validRequestUser3 = validRequestUser.copy(cpf = "85737421279", emails = listOf("somemail@5mail.com"))
+
+        val body = listOf(validRequestUser1, validRequestUser2, validRequestUser3)
+
+        client
+                .post()
+                .uri("$contextPath/user")
+                .contentType(MediaType.APPLICATION_JSON)
+                .syncBody(body)
+                .exchange()
+                .expectStatus()
+                .isCreated
+
+        client
+                .get()
+                .uri("$contextPath/user?lastName=${validRequestUser1.lastName}")
+                .exchange()
+                .expectStatus()
+                .isOk
+                .expectBodyList<UserResponse>().hasSize(2)
+
+
+    }
+
+
+    @Test
+    @DisplayName("Should create many users at same time and list for cpf")
+    fun test6(){
+
+        val validRequestUser1 =  validRequestUser.copy(cpf = "47536562179", emails = listOf("doe@6mail.com"))
+
+        val validRequestUser2 = validRequestUser.copy(cpf = "67166992360", emails = listOf("doe2@6mail.com"))
+
+        val body = listOf(validRequestUser1, validRequestUser2)
+
+        client
+                .post()
+                .uri("$contextPath/user")
+                .contentType(MediaType.APPLICATION_JSON)
+                .syncBody(body)
+                .exchange()
+                .expectStatus()
+                .isCreated
+
+        client
+                .get()
+                .uri("$contextPath/user?cpf=${validRequestUser1.cpf}")
+                .exchange()
+                .expectStatus()
+                .isOk
+                .expectBodyList<UserResponse>().hasSize(1)
+
+
+    }
 
 }

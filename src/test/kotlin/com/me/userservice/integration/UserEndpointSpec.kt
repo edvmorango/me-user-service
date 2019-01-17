@@ -6,6 +6,7 @@ import com.me.userservice.endpoint.response.UserResponse
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.expectBodyList
 import org.springframework.test.web.reactive.server.returnResult
@@ -27,7 +28,7 @@ class UserEndpointSpec: IntegrationBaseSpec() {
 
 
     @Nested
-    @DisplayName("SuccessfulCalls")
+    @DisplayName("SuccessfulRequests")
     inner class SuccessUserSpec {
         @Test
         @DisplayName("Should create and find user")
@@ -254,5 +255,142 @@ class UserEndpointSpec: IntegrationBaseSpec() {
 
         }
     }
+
+
+    @Nested
+    @DisplayName("FailedRequests")
+    inner class FailureUserSpec {
+
+
+        val validUserRequestF = validRequestUser.copy(cpf = "78570758332", emails = listOf("somemail@maili.com"))
+
+
+        @Test
+        @DisplayName("Should fail to create a user with CPF conflict ")
+        fun test() {
+
+                 client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validRequestUser.copy(emails = listOf("email@semail.com")))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.CONFLICT)
+
+        }
+
+        @Test
+        @DisplayName("Should fail to create a user with email conflicts ")
+        fun test1() {
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validRequestUser.copy(cpf = "64735557814"))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.CONFLICT)
+
+        }
+
+
+        @Test
+        @DisplayName("Should fail to create a user with empty firstName ")
+        fun test2() {
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(firstName = ""))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+        }
+
+
+        @Test
+        @DisplayName("Should fail to create a user with empty lastName ")
+        fun test3() {
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(lastName = ""))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+        }
+
+        @Test
+        @DisplayName("Should fail to create a user with invalid birthDate ")
+        fun test4() {
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(birthDate = LocalDate.of(3000, 6, 1)))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(birthDate = LocalDate.of(1500, 6, 1)))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+        }
+
+        @Test
+        @DisplayName("Should fail to create a user with invalid CPF format ")
+        fun test5() {
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(cpf = "abacasd"))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(cpf = "1123123212312312"))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(cpf = "12345678901"))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+        }
+
+
+
+    }
+
+
 
 }

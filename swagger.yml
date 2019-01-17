@@ -5,28 +5,28 @@ info:
 host: "user-service"
 basePath: "/v1"
 tags:
-- name: "user"
+  - name: "user"
 schemes:
-- "http"
+  - "http"
 paths:
   /user:
     post:
       tags:
-      - "user"
+        - "user"
       summary: "Add User(s)"
       description: ""
       operationId: "create"
       consumes:
-      - "application/json"
+        - "application/json"
       produces:
-      - "application/stream+json"
+        - "application/stream+json"
       parameters:
-      - in: "body"
-        name: "body"
-        description: "User object"
-        required: true
-        schema:
-          $ref: "#/definitions/User"
+        - in: "body"
+          name: "body"
+          description: "User object"
+          required: true
+          schema:
+            $ref: "#/definitions/User"
       responses:
         201:
           description: "User created"
@@ -36,12 +36,12 @@ paths:
           description: "Bad request"
     get:
       tags:
-      - "user"
+        - "user"
       summary: "List users"
       description: "Returns users as "
       operationId: "list"
       produces:
-      - "application/stream+json"
+        - "application/stream+json"
       responses:
         200:
           description: "Streaming Users"
@@ -50,19 +50,19 @@ paths:
   /user/{userUuid}:
     get:
       tags:
-      - "user"
+        - "user"
       summary: "Find user by Uuid"
       description: "Returns a single user"
       operationId: "findByUuid"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - name: "userUuid"
-        in: "path"
-        description: "ID of pet to return"
-        required: true
-        type: "integer"
-        format: "int64"
+        - name: "userUuid"
+          in: "path"
+          description: "ID of pet to return"
+          required: true
+          type: "integer"
+          format: "int64"
       responses:
         200:
           description: "User found"
@@ -72,21 +72,21 @@ paths:
           description: "Not found"
     put:
       tags:
-      - "user"
+        - "user"
       summary: "Update User data"
       description: ""
       operationId: "update"
       consumes:
-      - "application/x-www-form-urlencoded"
+        - "application/x-www-form-urlencoded"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - name: "userUuid"
-        in: "path"
-        description: "ID of pet that needs to be updated"
-        required: true
-        type: "integer"
-        format: "int64"
+        - name: "userUuid"
+          in: "path"
+          description: "ID of pet that needs to be updated"
+          required: true
+          type: "integer"
+          format: "int64"
       responses:
         200:
           description: "User updated"
@@ -99,15 +99,15 @@ paths:
 
     delete:
       tags:
-      - "user"
+        - "user"
       summary: "Deletes a user"
       description: "Logical exclusion"
       operationId: "delete"
       parameters:
-      - name: "userUuid"
-        in: "path"
-        required: true
-        type: "string"
+        - name: "userUuid"
+          in: "path"
+          required: true
+          type: "string"
       responses:
         204:
           description: "User deleted"
@@ -120,7 +120,6 @@ definitions:
     properties:
       address:
         type: "string"
-        format: "int64"
       number:
         type: "integer"
       zipCode:

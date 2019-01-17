@@ -4,10 +4,12 @@ import com.me.userservice.endpoint.request.AddressRequest
 import com.me.userservice.endpoint.request.UserRequest
 import com.me.userservice.endpoint.response.UserResponse
 import org.junit.Before
+import org.junit.FixMethodOrder
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.runners.MethodSorters
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.expectBodyList
@@ -48,6 +50,7 @@ class UserEndpointSpec: IntegrationBaseSpec() {
 
 
     @Nested
+    @FixMethodOrder(MethodSorters.NAME_ASCENDING)
     @DisplayName("SuccessfulRequests")
     inner class SuccessUserSpec {
         @Test
@@ -278,6 +281,7 @@ class UserEndpointSpec: IntegrationBaseSpec() {
 
 
     @Nested
+    @FixMethodOrder(MethodSorters.NAME_ASCENDING)
     @DisplayName("FailedRequests")
     inner class FailureUserSpec {
 

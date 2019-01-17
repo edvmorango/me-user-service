@@ -19,7 +19,7 @@ interface UserService {
 
     fun create(user: User): Mono<User>
 
-    fun findByUuid(uuid: String): Mono<User>
+    fun findByUuid(uuid: String, activeOnly: Boolean = true): Mono<User>
 
     fun list(cpf: String? = null , firstName: String? = null, lastName: String? = null,  phones: List<String>? = null, emails: List<String>? = null ): Flux<User>
 
@@ -129,10 +129,11 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
                }
     }
 
-    override fun findByUuid(uuid: String): Mono<User> {
+    override fun findByUuid(uuid: String, activeOnly: Boolean): Mono<User> {
         return userRepository
                 .findByUuid(uuid)
                 .map { it.asDomain() }
+                .flatMap { if(it.active) it.toMono() else Mono.empty()  }
                 .switchIfEmpty(Mono.error(UserNotFoundException()))
     }
 
@@ -156,7 +157,7 @@ class UserServiceImpl(private val userRepository: UserRepository): UserService {
     override fun delete(uuid: String): Mono<Unit> {
         return userRepository
                 .findByUuid(uuid)
-                .flatMap { userRepository.delete(uuid) }
+                .flatMap { if(it.active) userRepository.delete(uuid) else Unit.toMono() }
                 .switchIfEmpty(Mono.error(UserNotFoundException()))
 
     }

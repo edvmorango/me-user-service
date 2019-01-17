@@ -404,7 +404,7 @@ class UserServiceSpec{
 
             userService.delete(user.uuid!!).block()
 
-            assert(!userService.findByUuid(user.uuid!!).block()!!.active)
+            assertThrows<UserNotFoundException> { userService.findByUuid(user.uuid!!).block()!! }
         }
 
 

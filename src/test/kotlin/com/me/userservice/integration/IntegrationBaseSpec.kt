@@ -27,9 +27,6 @@ class IntegrationBaseSpec{
 
     protected val contextPath = "/user-service/v1"
 
-//    @Autowired
-//    private lateinit var dynamod: DynamoDBConfig
-//
     @BeforeAll
     fun initApplication() {
         val runApplication = runApplication<UserServiceApplication>()

@@ -9,6 +9,6 @@ context:
 aws:
   dynamodb:
     region: "us-east-1"
-    host: "http://localhost:8000"
+    host: "http://localhost:9999"
     access-key: "123"
     secret-key: "123"

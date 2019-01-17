@@ -2,10 +2,12 @@ package com.me.userservice.integration
 
 import com.me.userservice.UserServiceApplication
 import com.me.userservice.UserServiceApplicationTests
+import com.me.userservice.config.DynamoDBConfig
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.runApplication
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
@@ -23,9 +25,16 @@ class IntegrationBaseSpec{
             .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .build()
 
+    protected val contextPath = "/user-service/v1"
+
+//    @Autowired
+//    private lateinit var dynamod: DynamoDBConfig
+//
     @BeforeAll
     fun initApplication() {
-        runApplication<UserServiceApplication>()
+        val runApplication = runApplication<UserServiceApplication>()
+        val bean = runApplication.getBean(DynamoDBConfig::class.java)
+        bean.resetTable()
     }
 }
 

@@ -110,4 +110,28 @@ class DynamoDBConfig {
     }
 
 
+    private fun deleteTable() {
+
+        val credentials: AwsCredentials = AwsBasicCredentials.create(accessKey, secretKey)
+
+        val client = DynamoDbClient.builder()
+                .endpointOverride(URI.create(host!!))
+                .region(Region.of(region!!))
+                .credentialsProvider { credentials }
+                .build()
+
+        val req = DeleteTableRequest
+                .builder()
+                .tableName("user")
+                .build()
+
+        client.deleteTable(req)
+    }
+
+
+    fun resetTable() {
+        deleteTable()
+        createTable()
+    }
+
 }

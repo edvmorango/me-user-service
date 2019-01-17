@@ -9,7 +9,7 @@ class HealthEndpointSpec: IntegrationBaseSpec() {
     @Test
     @DisplayName("Should health check")
     fun getBooks() {
-        client.get().uri("/user-service/v1/health")
+        client.get().uri(contextPath + "/health")
                 .exchange().expectStatus().isOk
     }
 

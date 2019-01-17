@@ -14,11 +14,20 @@ Follow the instructions in the root project, before continue.
 
 * JDK 8/11
 * Gradle
-
+* docker
+* docker-compose
 
 ### Running
 
 This projects support multiple environments the default will be always the top-level configurations at application.yml
+
+Start containers:
+
+At project path run:
+
+```
+docker-compose up -d
+```
 
 Run in default environment:
 

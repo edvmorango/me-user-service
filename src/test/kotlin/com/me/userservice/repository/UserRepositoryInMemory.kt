@@ -83,7 +83,8 @@ class UserRepositoryInMemory : UserRepository {
 
     override fun delete(uuid: String): Mono<Unit> {
 
-        database.remove(uuid)
+        val item = database.get(uuid)!!
+        database[uuid] = item.copy(active = false)
 
         return Unit.toMono()
     }

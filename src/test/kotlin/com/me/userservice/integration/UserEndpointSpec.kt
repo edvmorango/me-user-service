@@ -293,11 +293,12 @@ class UserEndpointSpec: IntegrationBaseSpec() {
         @DisplayName("Should fail to create a user with CPF conflict ")
         fun test() {
 
+            val req = defaultInsertedUser.copy(emails = listOf("email@semail.com"))
                  client
                     .post()
                     .uri("$contextPath/user")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .syncBody(defaultInsertedUser.copy(emails = listOf("email@semail.com")))
+                    .syncBody(req)
                     .exchange()
                     .expectStatus()
                     .isEqualTo(HttpStatus.CONFLICT)

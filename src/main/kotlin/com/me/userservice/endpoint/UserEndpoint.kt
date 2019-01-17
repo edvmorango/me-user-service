@@ -23,7 +23,7 @@ class UserEndpoint(private val userService: UserService) {
                 .map { it.asResponse() }
 
         return ServerResponse
-                .ok()
+                .created(req.uri())
                 .contentType(MediaType.APPLICATION_STREAM_JSON)
                 .body(stream, UserResponse::class.java)
     }

@@ -3,6 +3,8 @@ package com.me.userservice.integration
 import com.me.userservice.endpoint.request.AddressRequest
 import com.me.userservice.endpoint.request.UserRequest
 import com.me.userservice.endpoint.response.UserResponse
+import org.junit.Before
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -11,6 +13,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.expectBodyList
 import org.springframework.test.web.reactive.server.returnResult
 import java.time.LocalDate
+import java.util.*
 
 
 @DisplayName("UserEndpointSpec")
@@ -25,6 +28,23 @@ class UserEndpointSpec: IntegrationBaseSpec() {
             validRequestAddress,
             listOf("jevmor@gmail.com", "jevmorr@gmail.com"),
             listOf("92991179136"))
+
+    val defaultInsertedUser = validRequestUser.copy(cpf = "78570758332", emails = listOf("somemail@mailiaa.com"))
+
+    @BeforeAll
+    fun setup() {
+
+        client
+                .post()
+                .uri("$contextPath/user")
+                .contentType(MediaType.APPLICATION_JSON)
+                .syncBody(defaultInsertedUser)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CREATED)
+                .returnResult<Object>().responseBody.blockFirst()
+
+    }
 
 
     @Nested
@@ -78,7 +98,7 @@ class UserEndpointSpec: IntegrationBaseSpec() {
                     .exchange()
                     .expectStatus()
                     .isOk
-                    .expectBodyList<UserResponse>().hasSize(3)
+                    .expectBodyList<UserResponse>().hasSize(4)
 
 
         }
@@ -262,7 +282,7 @@ class UserEndpointSpec: IntegrationBaseSpec() {
     inner class FailureUserSpec {
 
 
-        val validUserRequestF = validRequestUser.copy(cpf = "78570758332", emails = listOf("somemail@maili.com"))
+        val validUserRequestF = defaultInsertedUser.copy(cpf = "64385138656", emails = listOf("szx@gamail.com"))
 
 
         @Test
@@ -273,7 +293,7 @@ class UserEndpointSpec: IntegrationBaseSpec() {
                     .post()
                     .uri("$contextPath/user")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .syncBody(validRequestUser.copy(emails = listOf("email@semail.com")))
+                    .syncBody(defaultInsertedUser.copy(emails = listOf("email@semail.com")))
                     .exchange()
                     .expectStatus()
                     .isEqualTo(HttpStatus.CONFLICT)
@@ -288,7 +308,7 @@ class UserEndpointSpec: IntegrationBaseSpec() {
                     .post()
                     .uri("$contextPath/user")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .syncBody(validRequestUser.copy(cpf = "64735557814"))
+                    .syncBody(defaultInsertedUser.copy(cpf = "64735557814"))
                     .exchange()
                     .expectStatus()
                     .isEqualTo(HttpStatus.CONFLICT)
@@ -387,6 +407,88 @@ class UserEndpointSpec: IntegrationBaseSpec() {
 
         }
 
+
+        @Test
+        @DisplayName("Should fail to create a user with a invalid  email format ")
+        fun test6() {
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(emails = listOf("aaa")))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+
+        }
+
+        @Test
+        @DisplayName("Should fail to create a user with empty emails ")
+        fun test7() {
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(emails = listOf()))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+
+        }
+
+        @Test
+        @DisplayName("Should fail to create a user with a invalid phone format ")
+        fun test8() {
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(phones = listOf("aaa")))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(phones = listOf("999999999999")))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(phones = listOf("123123")))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+        }
+
+        @Test
+        @DisplayName("Should fail to create a user with empty phones ")
+        fun test9() {
+
+            client
+                    .post()
+                    .uri("$contextPath/user")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .syncBody(validUserRequestF.copy(emails = listOf()))
+                    .exchange()
+                    .expectStatus()
+                    .isEqualTo(HttpStatus.BAD_REQUEST)
+
+
+        }
 
 
     }
